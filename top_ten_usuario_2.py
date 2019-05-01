@@ -69,8 +69,9 @@ if __name__ == '__main__':
     print(len(submission[submission.idavisos.notnull()]))
     print(len(submission[submission.idavisos.isnull()]))
 
-    top_ten = "b4d408ac861643e406fff0df747b1498e05c9ccf a3c012c26c38a20ea276e005fb497aa87da72a31 516475402f7189f82624606bb5ed0020671fc3c7 57d98bb45d992aaa00a2426b1c71ca3b253014f6 65e6f5fb6aa6f97acaa843e931b42d951e0c9f61 5ba93bf725a78e530df4b2e1884baf1185d45ba1 ad900f00623c0f9fc17f79f3fa5fa2b9b1a35922 f1e36e94066f7fe6806a5bfd95fa82223ef6615c 64da4815303c8168b9c54c23cc568e029a979347 c79ac2a1684ae683bfa25947c05100e628ca21e2"
-
+    from top_ten import top_ten
+    top_ten = top_ten()
+    
     submission.loc[submission.idavisos.isnull(), ['idavisos']] = top_ten
     print(len(submission[submission.idavisos.notnull()]))
     print(len(submission[submission.idavisos.isnull()]))

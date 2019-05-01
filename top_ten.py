@@ -1,26 +1,13 @@
-import numpy as np
+import numpy as numpy
 import pandas as pd
 
-print("Reading data...")
-hits = pd.read_csv('data/users_hitaviso.csv')
+def top_ten_prediction(input = 'data/hit_avisos.pkl'):
+    #print("Reading data...")
+    hits = pd.read_pickle(input)
 
-print("Grouping Top Ten...")
-top_ten = hits.groupby('idaviso').count().sort_values(['portal'], ascending=False).head(10)
+    #print("Grouping Top Ten...")
+    top_ten = hits.groupby('idaviso').count().sort_values(['idusuario'], ascending=False).head(10)
 
-print("Returning results...")
-top_ten = pd.DataFrame(top_ten)
-
-print(top_ten)
-
-prediction = top_ten
-
-print("Loading Test...")
-test = pd.read_csv('data/contactos_test.csv')
-
-print("Making predictions...")
-test['idavisos'] = prediction
-
-print(test.head(10))
-
-print("Saving results...")
-#test.to_csv('salidas/submision.csv', index=False)
+    #print("Returning results...")
+    top_ten = top_ten.reset_index().idaviso
+    return ' '.join(top_ten)
