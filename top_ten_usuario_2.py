@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+from top_ten import top_ten_prediction
 import sqlite_functions.sqlite as fun_sql
 import pandas as pd
 
@@ -69,9 +70,8 @@ if __name__ == '__main__':
     print(len(submission[submission.idavisos.notnull()]))
     print(len(submission[submission.idavisos.isnull()]))
 
-    from top_ten import top_ten
-    top_ten = top_ten()
-    
+    top_ten = top_ten_prediction()
+
     submission.loc[submission.idavisos.isnull(), ['idavisos']] = top_ten
     print(len(submission[submission.idavisos.notnull()]))
     print(len(submission[submission.idavisos.isnull()]))
