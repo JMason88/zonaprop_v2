@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import coo_matrix
 from collections import defaultdict
-#from top_ten_recsys import top_ten_recommender
+from top_ten import top_ten_prediction
 
 
 import lightfm as lfm
@@ -12,9 +12,12 @@ from lightfm import cross_validation
 from lightfm import evaluation
 
 print('Reading train pickle...')
-df_train = pd.read_pickle('data/train.pkl')
-#df_train = df_train[:1500000]
+df_train = pd.read_pickle('data/hit_avisos.pkl')
+df_train = df_train[:200000]
 df_train['rating'] = 1
+#print(df_train[df_train['idusuario'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
+#print(df_train[df_train['idaviso'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
+
 print(df_train.head())
 print(50 * '-')
 
@@ -25,20 +28,21 @@ print(df_test.head())
 print(50 * '-')
 
 print('Reading Avisos pickle...')
-avisos = pd.read_pickle('data/avisos.pkl')
+avisos = pd.read_pickle('data/item_features.pkl')
+avisos = avisos.drop_duplicates(subset=['idaviso'])
 print(avisos.head())
 print(50 * '-')
 
 print('The train dataset has %s users and %s items, '
       'with %s interactions in the test and %s interactions in the training set.'
-      % (len(df_train['idpostulante'].unique()), len(df_train['idaviso'].unique()), len(df_test), len(df_train)))
+      % (len(df_train['idusuario'].unique()), len(df_train['idaviso'].unique()), len(df_test), len(df_train)))
 print(50 * '-')
 
 print('Creating Interactions...')
-interactions = rs.create_interaction_matrix(df_train,
-                                            'idpostulante',
-                                            'idaviso',
-                                            'rating')
+interactions = rs.create_interaction_matrix(df=df_train,
+                                            user_col='idusuario',
+                                            item_col='idaviso',
+                                            rating_col='rating')
 
 print("Interactions shape is {}".format(interactions.shape))
 print(50 * '-')
@@ -49,9 +53,9 @@ print(user_dict)
 print(50 * '-')
 
 print('Creating Item Dictionary...')
-avisos_dict = rs.create_item_dict(df=avisos,
+avisos_dict = rs.create_item_dict(df=df_train,
                                   id_col='idaviso',
-                                  name_col='titulo')
+                                  name_col='idaviso')
 # print(movies_dict)
 print(50 * '-')
 
@@ -89,8 +93,8 @@ for key in dict:
 
 print(lst)
 
-prediction = pd.DataFrame(lst, columns=['idpostulante', 'idaviso'])
-prediction['idaviso'] = prediction['idaviso'].astype(int).astype('str')
+prediction = pd.DataFrame(lst, columns=['idusuario', 'idaviso'])
+prediction['idaviso'] = prediction['idaviso'].astype('str')
 
 print(prediction.head(30))
 
@@ -98,26 +102,31 @@ print(prediction.head(30))
 
 print('Merging results...')
 submission = pd.merge(
-    df_test[['idpostulante']],
+    df_test[['idusuario']],
     prediction,
-    left_on='idpostulante',
-    right_on='idpostulante',
+    left_on='idusuario',
+    right_on='idusuario',
     how='left'
 )
 print(submission[submission.idaviso.notnull()].head(15))
+submission_hot = submission[submission.idaviso.notnull()]
+submission_cold = submission[submission.idaviso.isnull()]
 print(50*"-")
-print("Cantidad de usuarios CON predicción: {}".format(len(submission[submission.idaviso.notnull()])))
-print("Cantidad de usuarios SIN predicción: {}".format(len(submission[submission.idaviso.isnull()])))
+submission_hot = submission_hot.groupby(['idusuario'])['idaviso'].apply(list).reset_index()
+submission_hot['idaviso'] = submission_hot['idaviso'].apply(lambda x: " ".join(x))
+print(submission_hot.head(15))
+print(50*"-")
+print("Cantidad de usuarios CON predicción: {}".format(len(submission_hot)))
+print("Cantidad de usuarios SIN predicción: {}".format(len(submission_cold)))
 
-top_ten_prediction = top_ten_recommender(
-    test=submission[submission.idaviso.isnull()],
-    verbose=False
-)
+top_ten_prediction = top_ten_prediction()
+submission_cold.loc[:, ['idaviso']] = top_ten_prediction
 
-submission = pd.concat([submission[submission.idaviso.notnull()], top_ten_prediction])
+submission = pd.concat([submission_hot, submission_cold])
 print(submission.head(15))
 print("Cantidad de usuarios CON predicción: {}".format(len(submission[submission.idaviso.notnull()])))
 print("Cantidad de usuarios SIN predicción: {}".format(len(submission[submission.idaviso.isnull()])))
 
 print('Saving Results...')
-submission[['idpostulante', 'idaviso']].to_csv('salidas/submission.csv', index=False)
+print(submission[['idusuario', 'idaviso']].head(30))
+submission[['idusuario', 'idaviso']].to_csv('salidas/submision.csv', index=False)
