@@ -4,8 +4,8 @@ from top_ten import top_ten_prediction
 import sqlite_functions.sqlite as fun_sql
 import pandas as pd
 
-
-if __name__ == '__main__':
+def top_ten_usuario_recsys():
+    print("///          INITIALIZING TOP TEN BY USER RECSYS          ///")
     print('Creating SQlite DB in memory...')
     conn = fun_sql.create_connection()
     print(conn)
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     ORDER BY 1,3 DESC
     ;
     """
-    
+
     print('Executing SQL Statement...')
     c = conn.cursor()
     c.execute(sql)
@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
     print('Reading rows...')
     from collections import defaultdict
+
     dict = defaultdict(list)
     for row in rows:
         dict[row[0]].append(row[1])
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     lst = []
     for key in dict:
         sub_lst = []
-        if len(dict[key]) > 5:
+        if len(dict[key]) > 10:
             sub_lst = [key, ' '.join(dict[key][:10])]
         else:
             sub_lst = [key, ' '.join(dict[key])]
@@ -76,5 +77,6 @@ if __name__ == '__main__':
     print(len(submission[submission.idavisos.notnull()]))
     print(len(submission[submission.idavisos.isnull()]))
 
-    submission.to_csv('salidas/submision.csv', index=False)
+    #submission.to_csv('salidas/submision.csv', index=False)
     fun_sql.close_connection(conn=conn)
+    return submission
