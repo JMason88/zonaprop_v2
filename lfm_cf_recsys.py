@@ -14,7 +14,9 @@ from lightfm import evaluation
 
 print('Reading train pickle...')
 df_train = pd.read_pickle('data/contactos_train.pkl')
-#df_train = df_train[:2000]
+df_train = df_train[['idusuario','idaviso']].groupby(['idusuario','idaviso']).size('rating').reset_index()
+print(df_train.head(5))
+#df_train = df_train[:10000]
 df_train['rating'] = 1
 #print(df_train[df_train['idusuario'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
 #print(df_train[df_train['idaviso'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
