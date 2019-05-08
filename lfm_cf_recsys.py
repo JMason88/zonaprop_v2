@@ -14,7 +14,7 @@ from lightfm import evaluation
 
 print('Reading train pickle...')
 df_train = pd.read_pickle('data/contactos_train.pkl')
-df_train = df_train[['idusuario','idaviso']].groupby(['idusuario','idaviso']).size('rating').reset_index()
+df_train = df_train[['idusuario','idaviso']].groupby(['idusuario','idaviso']).size().reset_index()
 print(df_train.head(5))
 #df_train = df_train[:10000]
 df_train['rating'] = 1
