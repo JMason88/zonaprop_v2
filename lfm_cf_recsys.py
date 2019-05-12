@@ -14,10 +14,10 @@ from lightfm import evaluation
 
 print('Reading train pickle...')
 df_train = pd.read_pickle('data/contactos_train.pkl')
-df_train = df_train[['idusuario','idaviso']].groupby(['idusuario','idaviso']).size().reset_index()
+df_train = df_train[['idusuario','idaviso']]
 print(df_train.head(5))
-#df_train = df_train[:10000]
-df_train['rating'] = 1
+df_train = df_train[:100000]
+df_train['rating'] = int(1)
 #print(df_train[df_train['idusuario'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
 #print(df_train[df_train['idaviso'] == 'bbafbc31dc6e26a8b2e46e0ed55a63ed1acbd7d6'])
 
@@ -28,6 +28,20 @@ print('Reading test pickle...')
 df_test = pd.read_pickle('data/test.pkl')
 #df_test = df_test[:1000]
 print(df_test.head())
+print(50 * '-')
+
+print('Prueba...')
+interseccion = pd.merge(
+    df_train[['idusuario']],
+    df_test[['idusuario']],
+    left_on='idusuario',
+    right_on='idusuario',
+    how='inner'
+)
+
+print("Hay {} usuarios en Train.".format(len(df_train['idusuario'].unique())))
+print("Hay {} usuarios en Test.".format(len(df_test['idusuario'].unique())))
+print("Hay solo {} usuarios que son HOT.".format(len(interseccion['idusuario'].unique())))
 print(50 * '-')
 
 print('Reading Avisos pickle...')
@@ -42,7 +56,7 @@ print('The train dataset has %s users and %s items, '
 print(50 * '-')
 
 print('Creating Interactions...')
-interactions = rs.create_interaction_matrix(df=df_train,
+interactions = rs.create_interaction_matrix(df=df_train[['idusuario', 'idaviso', 'rating']],
                                             user_col='idusuario',
                                             item_col='idaviso',
                                             rating_col='rating')

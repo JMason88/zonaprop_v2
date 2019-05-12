@@ -214,3 +214,22 @@ def predict_ratings(model, interactions, user_id, user_dict,item_dict, threshold
     scores.index = interactions.columns
     scores = scores.sort_values(ascending=False)
     return scores
+
+def create_interaction_matrix2(df, user_col, item_col, rating_col, norm=False, threshold=None):
+    '''
+    Function to create an interaction matrix dataframe from transactional type interactions
+    Required Input -
+        - df = Pandas DataFrame containing user-item interactions
+        - user_col = column name containing user's identifier
+        - item_col = column name containing item's identifier
+        - rating col = column name containing user feedback on interaction with a given item
+        - norm (optional) = True if a normalization of ratings is needed
+        - threshold (required if norm = True) = value above which the rating is favorable
+    Expected output -
+        - Pandas dataframe with user-item interactions ready to be fed in a recommendation algorithm
+    '''
+    interactions = df.groupby([user_col, item_col])[rating_col].sum()
+    interactions = interactions.unstack().reset_index().fillna(0).set_index(user_col)
+    if norm:
+        interactions = interactions.applymap(lambda x: 1 if x > threshold else 0)
+    return interactions
