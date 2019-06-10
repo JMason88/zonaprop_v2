@@ -55,7 +55,7 @@ def top_ten_usuario_recsys():
             sub_lst = [key, ' '.join(dict[key])]
         lst.append(sub_lst)
 
-    df = pd.DataFrame(lst, columns=['idusuario', 'idavisos'])
+    df = pd.DataFrame(lst, columns=['idusuario', 'idaviso'])
 
     test = pd.read_csv('data/contactos_test.csv')
 
@@ -67,15 +67,15 @@ def top_ten_usuario_recsys():
         right_on='idusuario',
         how='left'
     )
-    print(submission[submission.idavisos.notnull()].head(30))
-    print(len(submission[submission.idavisos.notnull()]))
-    print(len(submission[submission.idavisos.isnull()]))
+    print(submission[submission.idaviso.notnull()].head(30))
+    print(len(submission[submission.idaviso.notnull()]))
+    print(len(submission[submission.idaviso.isnull()]))
 
     top_ten = top_ten_prediction()
 
-    submission.loc[submission.idavisos.isnull(), ['idavisos']] = top_ten
-    print(len(submission[submission.idavisos.notnull()]))
-    print(len(submission[submission.idavisos.isnull()]))
+    submission.loc[submission.idaviso.isnull(), ['idaviso']] = top_ten
+    print(len(submission[submission.idaviso.notnull()]))
+    print(len(submission[submission.idaviso.isnull()]))
 
     #submission.to_csv('salidas/submision.csv', index=False)
     fun_sql.close_connection(conn=conn)
